@@ -1,23 +1,23 @@
 #include <netdb.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 
 int main() {
-  int status;
-  struct addrinfo hints;
-  struct addrinfo *servinfo;
+  struct addrinfo hints, *res;
   memset(&hints, 0, sizeof hints);
-  hints.ai_family = AF_UNSPEC;
+  hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_STREAM;
-  hints.ai_protocol = AI_PASSIVE;
+  hints.ai_flags = AI_PASSIVE;
 
-  status = getaddrinfo(NULL, "80", &hints, &servinfo);
-  int sock = socket(AF_UNSPEC, SOCK_STREAM, 0);
+  getaddrinfo(NULL, "80", &hints, &res);
 
-  if (status != 0) {
-    exit(1);
+  int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+  bind(sockfd, res->ai_addr, res->ai_addrlen);
+  while (1) {
+    if (sockfd == -1) {
+      exit(-1);
+    }
   }
 }
