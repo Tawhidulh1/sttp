@@ -16,7 +16,7 @@ int main() {
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE;
 
-  int sockinfo = getaddrinfo(NULL, PORT, &hints, &res);
+  getaddrinfo(NULL, PORT, &hints, &res);
 
   int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
   int bindStatus = bind(sockfd, res->ai_addr, res->ai_addrlen);
@@ -37,6 +37,7 @@ int main() {
     requestSize = sizeof requestAddr;
     int requestfd =
         accept(sockfd, (struct sockaddr *)&requestAddr, &requestSize);
+
     printf("(%d)Request accepted\n", sockfd);
     char requestData[4096];
     int bytesRecieved = recv(requestfd, requestData, sizeof requestData - 1, 0);
@@ -45,5 +46,21 @@ int main() {
       printf("Recieved: %d bytes\n", bytesRecieved);
       printf("Here is your data sir: \n%s\n", requestData);
     }
+
+    char responseData[4096];
+    memset(responseData, 0, sizeof responseData);
+    int responseLength = sizeof responseData;
+    char body[100] = "HELLO WORLD HHAHAHAHHAHAHAHA";
+    // TODO: Consider adding Date header
+    snprintf(responseData, sizeof responseData,
+             "HTTP/1.1 200 OK\r\n"
+             "Content-Length: %zu\r\n"
+             "Content-type: text/plain\r\n"
+             "\r\n"
+             "%s",
+             sizeof responseData, body);
+    send(requestfd, responseData, responseLength, 0);
+    close(requestfd);
   }
+  close(sockfd);
 }
