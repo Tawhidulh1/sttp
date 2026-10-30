@@ -26,7 +26,7 @@ int main() {
   int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 
   int yes = 1;
-  setsockopt(sockfd, res->ai_protocol, SO_REUSEADDR, &yes, sizeof yes);
+  setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes);
 
   int bindStatus = bind(sockfd, res->ai_addr, res->ai_addrlen);
 
@@ -59,7 +59,7 @@ int main() {
     char responseData[4096];
     memset(responseData, 0, sizeof responseData);
     int responseLength = sizeof responseData;
-    char body[100] = "HELLO WORLD HHAHAHAHHAHAHAHA";
+    char body[100] = "<html>HELLO WORLD HHAHAHAHHAHAHAHA</html>";
     // TODO: Consider adding Date header
     snprintf(responseData, sizeof responseData,
              "HTTP/1.1 200 OK\r\n"
@@ -67,8 +67,12 @@ int main() {
              "Content-type: text/html\r\n"
              "\r\n"
              "%s",
-             sizeof responseData, body);
-    send(requestfd, responseData, responseLength, 0);
+             strlen(body), body);
+    int sendCode = send(requestfd, responseData, responseLength, 0);
+    if (sendCode == -1) {
+      perror("send");
+    }
+
     close(requestfd);
   }
   close(sockfd);
