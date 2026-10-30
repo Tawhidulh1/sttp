@@ -7,10 +7,14 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "file.h"
+
 #define PORT "8080"
 #define BACKLOG 10
 
+#define ROOT "~/Documents/test"
 int main() {
+
   struct addrinfo hints, *res;
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_INET;
@@ -52,22 +56,33 @@ int main() {
     int bytesRecieved = recv(requestfd, requestData, sizeof requestData - 1, 0);
     if (bytesRecieved > 0) {
       requestData[bytesRecieved] = '\0';
-      printf("Recieved: %d bytes\n", bytesRecieved);
-      printf("Here is your data sir: \n%s\n", requestData);
+    }
+    printf("Here is the requested data: %s\n", requestData);
+    char method[16], path[2048];
+    if (sscanf(requestData, "%15s %2047s", method, path) != 2) {
+      char badRequest[] = "HTTP/1.1 400 Bad Request\r\n"
+                          "Content-Length: 11\r\n"
+                          "Content-type: text/html\r\n"
+                          "\r\n"
+                          "Bad Request";
+      send(requestfd, badRequest, strlen(badRequest), 0);
+      close(requestfd);
+      continue;
     }
 
     char responseData[4096];
     memset(responseData, 0, sizeof responseData);
     int responseLength = sizeof responseData;
     char body[100] = "<html>HELLO WORLD HHAHAHAHHAHAHAHA</html>";
+
     // TODO: Consider adding Date header
     snprintf(responseData, sizeof responseData,
              "HTTP/1.1 200 OK\r\n"
              "Content-Length: %zu\r\n"
-             "Content-type: text/html\r\n"
+             "Content-type: %s\r\n"
              "\r\n"
              "%s",
-             strlen(body), body);
+             strlen(body), getContentType(path), body);
     int sendCode = send(requestfd, responseData, responseLength, 0);
     if (sendCode == -1) {
       perror("send");
