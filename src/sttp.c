@@ -16,13 +16,17 @@ int main() {
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE;
 
-  getaddrinfo(NULL, PORT, &hints, &res);
+  int getAddrInfo = getaddrinfo(NULL, PORT, &hints, &res);
+  if (getAddrInfo != 0) {
+    fprintf(stderr, "getaddrinfo failed:%s\n", gai_strerror(getAddrInfo));
+    return 1;
+  }
 
   int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
   int bindStatus = bind(sockfd, res->ai_addr, res->ai_addrlen);
 
   if (bindStatus != 0) {
-    perror("error with bind");
+    perror("bind");
     exit(1);
   }
 
