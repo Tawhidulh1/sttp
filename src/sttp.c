@@ -1,3 +1,4 @@
+#include <asm-generic/socket.h>
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,6 +24,10 @@ int main() {
   }
 
   int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+
+  int yes = 1;
+  setsockopt(sockfd, res->ai_protocol, SO_REUSEADDR, &yes, sizeof yes);
+
   int bindStatus = bind(sockfd, res->ai_addr, res->ai_addrlen);
 
   if (bindStatus != 0) {
@@ -59,7 +64,7 @@ int main() {
     snprintf(responseData, sizeof responseData,
              "HTTP/1.1 200 OK\r\n"
              "Content-Length: %zu\r\n"
-             "Content-type: text/plain\r\n"
+             "Content-type: text/html\r\n"
              "\r\n"
              "%s",
              sizeof responseData, body);
