@@ -11,11 +11,7 @@
 
 #define PORT "8080"
 #define BACKLOG 10
-int main() {
-
-  char root[256];
-  snprintf(root, sizeof root, "%s/Documents/test", getenv("HOME"));
-
+int sttp(char *root) {
   struct addrinfo hints, *res;
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_INET;
@@ -67,7 +63,7 @@ int main() {
                         "Bad Request";
 
     char method[16], path[2048];
-    if (sscanf(requestData, "%15s %2047s", method, path) != 2) {
+    if (sscanf(requestData, "%15s %2047s", method, path) != 2 || root == NULL) {
       send(requestfd, badRequest, strlen(badRequest), 0);
       close(requestfd);
       continue;
@@ -77,7 +73,7 @@ int main() {
     memset(responseData, 0, sizeof responseData);
     int responseLength = sizeof responseData;
 
-    char pathToIndex[267];
+    char pathToIndex[strlen(root) + strlen("/index.html") + 1];
     snprintf(pathToIndex, sizeof pathToIndex, "%s/index.html", root);
     FILE *fp = fopen(pathToIndex, "rb");
     if (fp == NULL) {
