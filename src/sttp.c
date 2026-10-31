@@ -11,9 +11,10 @@
 
 #define PORT "8080"
 #define BACKLOG 10
-
-#define ROOT "~/Documents/test"
 int main() {
+
+  char root[256];
+  snprintf(root, sizeof root, "%s/Documents/test", getenv("HOME"));
 
   struct addrinfo hints, *res;
   memset(&hints, 0, sizeof hints);
@@ -58,13 +59,15 @@ int main() {
       requestData[bytesRecieved] = '\0';
     }
     printf("Here is the requested data: %s\n", requestData);
+
+    char badRequest[] = "HTTP/1.1 400 Bad Request\r\n"
+                        "Content-Length: 11\r\n"
+                        "Content-type: text/html\r\n"
+                        "\r\n"
+                        "Bad Request";
+
     char method[16], path[2048];
     if (sscanf(requestData, "%15s %2047s", method, path) != 2) {
-      char badRequest[] = "HTTP/1.1 400 Bad Request\r\n"
-                          "Content-Length: 11\r\n"
-                          "Content-type: text/html\r\n"
-                          "\r\n"
-                          "Bad Request";
       send(requestfd, badRequest, strlen(badRequest), 0);
       close(requestfd);
       continue;
@@ -73,8 +76,22 @@ int main() {
     char responseData[4096];
     memset(responseData, 0, sizeof responseData);
     int responseLength = sizeof responseData;
-    char body[100] = "<html>HELLO WORLD HHAHAHAHHAHAHAHA</html>";
 
+    char pathToIndex[267];
+    snprintf(pathToIndex, sizeof pathToIndex, "%s/index.html", root);
+    FILE *fp = fopen(pathToIndex, "rb");
+    if (fp == NULL) {
+      send(requestfd, badRequest, strlen(badRequest), 0);
+      close(requestfd);
+      continue;
+    }
+    char *body = getFileContents(fp);
+    if (body == NULL) {
+      send(requestfd, badRequest, strlen(badRequest), 0);
+      close(requestfd);
+      continue;
+    }
+    fclose(fp);
     // TODO: Consider adding Date header
     snprintf(responseData, sizeof responseData,
              "HTTP/1.1 200 OK\r\n"
@@ -82,12 +99,13 @@ int main() {
              "Content-type: %s\r\n"
              "\r\n"
              "%s",
-             strlen(body), getContentType(path), body);
+             strlen(body), getContentType(pathToIndex), body);
+    // strlen(body), "text/html", body);
     int sendCode = send(requestfd, responseData, responseLength, 0);
     if (sendCode == -1) {
       perror("send");
     }
-
+    free(body);
     close(requestfd);
   }
   close(sockfd);
