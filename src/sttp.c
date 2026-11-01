@@ -65,6 +65,11 @@ int sttp(char *root) {
       continue;
     }
 
+    // default / to /index.html
+    if (strcmp(path, "/") == 0) {
+      snprintf(path, sizeof path, "/index.html");
+    }
+
     char responseData[4096];
     memset(responseData, 0, sizeof responseData);
     int responseLength = sizeof responseData;
@@ -74,13 +79,13 @@ int sttp(char *root) {
     FILE *fp = fopen(pathToFile, "rb");
 
     if (fp == NULL) {
-      sendBadRequest(requestfd, 0);
+      send404(requestfd, 0);
       close(requestfd);
       continue;
     }
     char *body = getFileContents(fp);
     if (body == NULL) {
-      sendBadRequest(requestfd, 0);
+      send404(requestfd, 0);
       close(requestfd);
       continue;
     }
