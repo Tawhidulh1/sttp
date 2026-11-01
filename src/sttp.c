@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include "file.h"
+#include "methods.h"
 
 #define PORT "8080"
 #define BACKLOG 10
@@ -57,15 +58,9 @@ int sttp(char *root) {
     }
     printf("Here is the requested data: %s\n", requestData);
 
-    char badRequest[] = "HTTP/1.1 400 Bad Request\r\n"
-                        "Content-Length: 11\r\n"
-                        "Content-type: text/html\r\n"
-                        "\r\n"
-                        "Bad Request";
-
     char method[16], path[2048];
     if (sscanf(requestData, "%15s %2047s", method, path) != 2 || root == NULL) {
-      send(requestfd, badRequest, strlen(badRequest), 0);
+      sendBadRequest(requestfd, 0);
       close(requestfd);
       continue;
     }
@@ -79,13 +74,13 @@ int sttp(char *root) {
     FILE *fp = fopen(pathToFile, "rb");
 
     if (fp == NULL) {
-      send(requestfd, badRequest, strlen(badRequest), 0);
+      sendBadRequest(requestfd, 0);
       close(requestfd);
       continue;
     }
     char *body = getFileContents(fp);
     if (body == NULL) {
-      send(requestfd, badRequest, strlen(badRequest), 0);
+      sendBadRequest(requestfd, 0);
       close(requestfd);
       continue;
     }
