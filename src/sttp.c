@@ -40,21 +40,28 @@ int sttp(char *root) {
 
   struct sockaddr_in requestAddr;
   socklen_t requestSize;
+  int listenCode = listen(sockfd, BACKLOG);
+  if (listenCode != 0) {
+    exit(-1);
+  }
+  printf("Waiting for request\n");
   while (1) {
-    int listenCode = listen(sockfd, BACKLOG);
-    if (listenCode != 0) {
-      exit(-1);
-    }
-    printf("Waiting for request\n");
     requestSize = sizeof requestAddr;
     int requestfd =
         accept(sockfd, (struct sockaddr *)&requestAddr, &requestSize);
+
+    if (requestfd == -1) {
+      perror("accept");
+      continue;
+    }
 
     printf("(%d)Request accepted\n", sockfd);
     char requestData[4096];
     int bytesRecieved = recv(requestfd, requestData, sizeof requestData - 1, 0);
     if (bytesRecieved > 0) {
       requestData[bytesRecieved] = '\0';
+    } else {
+      close(requestfd);
     }
     printf("Here is the requested data: %s\n", requestData);
 
@@ -62,6 +69,14 @@ int sttp(char *root) {
     if (sscanf(requestData, "%15s %2047s", method, path) != 2 || root == NULL) {
       sendBadRequest(requestfd, 0);
       close(requestfd);
+      continue;
+    }
+
+    // if ".." is found, VERY BAD
+    if (strstr(path, "..") != NULL) {
+      sendBadRequest(requestfd, 0);
+      close(requestfd);
+      printf("DANGER DANGER\n");
       continue;
     }
 
