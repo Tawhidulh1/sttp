@@ -11,6 +11,7 @@
 
 #define PORT "8080"
 #define BACKLOG 10
+
 int sttp(char *root) {
   struct addrinfo hints, *res;
   memset(&hints, 0, sizeof hints);
@@ -73,9 +74,14 @@ int sttp(char *root) {
     memset(responseData, 0, sizeof responseData);
     int responseLength = sizeof responseData;
 
-    char pathToIndex[strlen(root) + strlen("/index.html") + 1];
-    snprintf(pathToIndex, sizeof pathToIndex, "%s/index.html", root);
-    FILE *fp = fopen(pathToIndex, "rb");
+    char pathToFile[strlen(root) + strlen(path) + 2];
+    snprintf(pathToFile, sizeof pathToFile, "%s/%s", root, path);
+    FILE *fp = fopen(pathToFile, "rb");
+
+    // char pathToIndex[strlen(root) + strlen("/index.html") + 1];
+    // snprintf(pathToIndex, sizeof pathToIndex, "%s/index.html", root);
+    // fp = fopen(pathToIndex, "rb");
+
     if (fp == NULL) {
       send(requestfd, badRequest, strlen(badRequest), 0);
       close(requestfd);
@@ -95,7 +101,7 @@ int sttp(char *root) {
              "Content-type: %s\r\n"
              "\r\n"
              "%s",
-             strlen(body), getContentType(pathToIndex), body);
+             strlen(body), getContentType(pathToFile), body);
     // strlen(body), "text/html", body);
     int sendCode = send(requestfd, responseData, responseLength, 0);
     if (sendCode == -1) {
