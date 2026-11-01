@@ -1,14 +1,22 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+void toLowerCase(char *str);
 
 char *getContentType(char *path) {
   char *extension = strrchr(path, '.');
   if (extension == NULL) {
     return "application/octet-stream";
   }
-  if (strcmp(extension, ".html") == 0 || strcmp(extension, ".HTML") == 0) {
+  toLowerCase(extension);
+
+  if (strcmp(extension, ".html") == 0) {
     return "text/html";
+  }
+  if (strcmp(extension, ".txt") == 0) {
+    return "text/txt";
   }
   return "application/octet-stream";
 }
@@ -33,4 +41,11 @@ char *getFileContents(FILE *fp) {
   }
   str[fileSize] = '\0';
   return str;
+}
+
+void toLowerCase(char *str) {
+  char *p;
+  for (p = str; *p; p++) {
+    *p = tolower((unsigned char)*p);
+  }
 }

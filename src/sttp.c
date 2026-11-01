@@ -78,10 +78,6 @@ int sttp(char *root) {
     snprintf(pathToFile, sizeof pathToFile, "%s/%s", root, path);
     FILE *fp = fopen(pathToFile, "rb");
 
-    // char pathToIndex[strlen(root) + strlen("/index.html") + 1];
-    // snprintf(pathToIndex, sizeof pathToIndex, "%s/index.html", root);
-    // fp = fopen(pathToIndex, "rb");
-
     if (fp == NULL) {
       send(requestfd, badRequest, strlen(badRequest), 0);
       close(requestfd);
