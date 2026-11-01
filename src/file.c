@@ -18,6 +18,12 @@ char *getContentType(char *path) {
   if (strcmp(extension, ".txt") == 0) {
     return "text/txt";
   }
+  if (strcmp(extension, ".css") == 0) {
+    return "text/css";
+  }
+  if (strcmp(extension, ".json") == 0) {
+    return "text/json";
+  }
   return "application/octet-stream";
 }
 
