@@ -101,19 +101,33 @@ int sttp(char *root) {
     char *body = getFileContents(fp);
     if (body == NULL) {
       send404(requestfd, 0);
+      fclose(fp);
       close(requestfd);
       continue;
     }
     fclose(fp);
     // TODO: Consider adding Date header
-    snprintf(responseData, sizeof responseData,
-             "HTTP/1.1 200 OK\r\n"
-             "Content-Length: %zu\r\n"
-             "Content-type: %s\r\n"
-             "\r\n"
-             "%s",
-             strlen(body), getContentType(pathToFile), body);
-    // strlen(body), "text/html", body);
+    if (strcmp(method, "HEAD") == 0) {
+      snprintf(responseData, sizeof responseData,
+               "HTTP/1.1 200 OK\r\n"
+               "Content-Length: %zu\r\n"
+               "Content-type: %s\r\n"
+               "\r\n",
+               strlen(body), getContentType(pathToFile));
+    } else if (strcmp(method, "GET") == 0) {
+      snprintf(responseData, sizeof responseData,
+               "HTTP/1.1 200 OK\r\n"
+               "Content-Length: %zu\r\n"
+               "Content-type: %s\r\n"
+               "\r\n"
+               "%s",
+               strlen(body), getContentType(pathToFile), body);
+    } else {
+      snprintf(responseData, sizeof responseData,
+               "HTTP/1.1 405 Method Not Allowed\r\n"
+               "Allow: GET, HEAD\r\n"
+               "\r\n");
+    }
     int sendCode = send(requestfd, responseData, responseLength, 0);
     if (sendCode == -1) {
       perror("send");
