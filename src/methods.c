@@ -4,7 +4,8 @@
 
 #include "methods.h"
 
-int redirect(char *response, char *method, char *path, char *args);
+int redirect(char *response, int responseLength, char *method, char *path,
+             char *args);
 int sendBadRequest(int fd, int flags);
 int send404(int fd, int flags);
 
@@ -15,7 +16,16 @@ action getAction(char *str) {
   return redirect;
 }
 
-int redirect(char *response, char *method, char *path, char *args) {
+int redirect(char *response, int responseLength, char *method, char *path,
+             char *args) {
+
+  snprintf(response, responseLength,
+           "HTTP/1.1 302 Found\r\n"
+           "Location: %s\r\n"
+           "Content-Length: 0\r\n"
+           "\r\n",
+           args);
+
   printf("ran redirect\n");
   return 0;
 }

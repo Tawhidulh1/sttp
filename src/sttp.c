@@ -13,7 +13,7 @@
 #define PORT "8080"
 #define BACKLOG 10
 
-int sttp(char *root) {
+int sttp(char *root, route *routes, int routesLength) {
   struct addrinfo hints, *res;
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_INET;
@@ -80,10 +80,45 @@ int sttp(char *root) {
       continue;
     }
 
-    // default / to /index.html
-    if (strcmp(path, "/") == 0) {
-      snprintf(path, sizeof path, "/index.html");
+    int i;
+    int ranAction = 0;
+    for (i = 0; i < routesLength; i++) {
+      route route = routes[i];
+      if (route.action == NULL || route.args == NULL || route.method == NULL ||
+          route.path == NULL) {
+        continue;
+      }
+      char response[4096];
+      memset(response, 0, sizeof response);
+      if (strcmp(method, route.method) != 0 || strcmp(path, route.path) != 0) {
+        continue;
+      }
+
+      int stat = route.action(response, sizeof(response), route.method,
+                              route.path, route.args);
+      ranAction = 1;
+      if (stat != 0) {
+        sendBadRequest(requestfd, 0);
+        break;
+      }
+      printf("here is response: %s\n", response);
+      stat = send(requestfd, response, sizeof response, 0);
+      if (stat == -1) {
+        perror("send");
+        sendBadRequest(requestfd, 0);
+      }
+      break;
     }
+
+    if (ranAction) {
+      close(requestfd);
+      continue;
+    }
+
+    // default / to /index.html
+    // if (strcmp(path, "/") == 0) {
+    //  snprintf(path, sizeof path, "/index.html");
+    //}
 
     char responseData[4096];
     memset(responseData, 0, sizeof responseData);

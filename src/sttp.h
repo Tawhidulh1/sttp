@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 
-int sttp(char *root);
+#include "methods.h"
+
+int sttp(char *root, route *routes, int routesLength);
 
 #endif

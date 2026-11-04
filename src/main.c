@@ -44,6 +44,8 @@ int main(int argc, char *argv[]) {
 
   // TODO: put each route into an array to be passed on to future functions.
   char line[1024];
+  route routes[1024];
+  int i = 0;
   while ((fgets(line, sizeof line, fp)) != NULL) {
     char method[16], path[2048], action[32], args[2048];
     line[strcspn(line, "\r\n")] = '\0';
@@ -52,14 +54,18 @@ int main(int argc, char *argv[]) {
       fprintf(stderr, "Error fetching from config file\n");
       return -1;
     }
+
     route route;
     route.method = strdup(method);
     route.path = strdup(path);
     route.args = strdup(args);
     route.action = getAction(action);
+
+    routes[i] = route;
+    i++;
   }
 
   printf("%s\n", root);
-  sttp(root);
+  sttp(root, routes, i);
   return 0;
 }
