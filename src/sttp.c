@@ -126,6 +126,10 @@ int sttp(char *root, route *routes, int routesLength) {
 
     char pathToFile[strlen(root) + strlen(path) + 2];
     snprintf(pathToFile, sizeof pathToFile, "%s/%s", root, path);
+    char *questionMarkInd = strchr(pathToFile, '?');
+    if (questionMarkInd != NULL) {
+      questionMarkInd[0] = '\0';
+    }
     FILE *fp = fopen(pathToFile, "rb");
 
     if (fp == NULL) {
@@ -141,6 +145,7 @@ int sttp(char *root, route *routes, int routesLength) {
       continue;
     }
     fclose(fp);
+
     // TODO: Consider adding Date header
     if (strcmp(method, "HEAD") == 0) {
       snprintf(responseData, sizeof responseData,
