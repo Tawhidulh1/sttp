@@ -67,14 +67,14 @@ int sttp(char *root, route *routes, int routesLength) {
 
     char method[16], path[2048];
     if (sscanf(requestData, "%15s %2047s", method, path) != 2 || root == NULL) {
-      sendBadRequest(requestfd, 0);
+      sendWithCode(requestfd, 400, 0);
       close(requestfd);
       continue;
     }
 
     // if ".." is found, VERY BAD
     if (strstr(path, "..") != NULL) {
-      sendBadRequest(requestfd, 0);
+      sendWithCode(requestfd, 400, 0);
       close(requestfd);
       printf("DANGER DANGER\n");
       continue;
@@ -98,14 +98,14 @@ int sttp(char *root, route *routes, int routesLength) {
                               route.path, route.args);
       ranAction = 1;
       if (stat != 0) {
-        sendBadRequest(requestfd, 0);
+        sendWithCode(requestfd, 400, 0);
         break;
       }
       printf("here is response: %s\n", response);
       stat = send(requestfd, response, sizeof response, 0);
       if (stat == -1) {
         perror("send");
-        sendBadRequest(requestfd, 0);
+        sendWithCode(requestfd, 400, 0);
       }
       break;
     }
@@ -129,13 +129,13 @@ int sttp(char *root, route *routes, int routesLength) {
     FILE *fp = fopen(pathToFile, "rb");
 
     if (fp == NULL) {
-      send404(requestfd, 0);
+      sendWithCode(requestfd, 404, 0);
       close(requestfd);
       continue;
     }
     char *body = getFileContents(fp);
     if (body == NULL) {
-      send404(requestfd, 0);
+      sendWithCode(requestfd, 404, 0);
       fclose(fp);
       close(requestfd);
       continue;

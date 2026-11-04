@@ -40,12 +40,32 @@ int sendBadRequest(int fd, int flags) {
   return 0;
 }
 
-int send404(int fd, int flags) {
-  char _404Body[] = "HTTP/1.1 404 Not Found\r\n"
-                    "Content-Length: 3\r\n"
-                    "Content-type: text/html\r\n"
-                    "\r\n"
-                    "404";
-  send(fd, _404Body, sizeof _404Body - 1, flags);
+int sendWithCode(int fd, int errorCode, int flags) {
+  char _responseBody[4096];
+  char error[128] = {0};
+  switch (errorCode) {
+  case (404):
+    strcpy(error, "Not Found");
+    break;
+  case (400):
+    strcpy(error, "Bad Request");
+    break;
+  case (501):
+    strcpy(error, "Not Implemented");
+    break;
+  case (505):
+    strcpy(error, "HTTP Version Not Supported");
+    break;
+  default:
+    return -1;
+  }
+  snprintf(_responseBody, sizeof _responseBody,
+           "HTTP/1.1 %d %s\r\n"
+           "Content-Length: %zu\r\n"
+           "Content-type: text/html\r\n"
+           "\r\n"
+           "%d %s",
+           errorCode, error, strlen(error) + 4, errorCode, error);
+  send(fd, _responseBody, sizeof _responseBody - 1, flags);
   return 0;
 }

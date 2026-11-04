@@ -11,8 +11,7 @@ typedef struct {
   action action;
 } route;
 
-int sendBadRequest(int fd, int flags);
-int send404(int fd, int flags);
+int sendWithCode(int fd, int errorCode, int flags);
 action getAction(char *str);
 
 #endif
