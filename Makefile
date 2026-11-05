@@ -10,7 +10,17 @@ build/%.o: src/%.c
 
 -include $(OBJS:.o=.d)
 
-.PHONY: clean
+PREFIX ?= ~/.local
+BINDIR := $(PREFIX)/bin
+
+.PHONY: clean install uninstall
 	
 clean:
 	rm -rf build sttp
+
+install: sttp
+	install -d $(DESTDIR)$(BINDIR)
+	install -m 755 sttp $(DESTDIR)$(BINDIR)/sttp
+
+uninstall:
+	rm -f $(DESTDIR)$(BINDIR)/sttp
