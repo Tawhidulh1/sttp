@@ -14,4 +14,6 @@ As the name may not suggest, this is not http or anything. But a simple web serv
 git clone https://github.com/Tawhidulh1/sttp.git
 cd sttp
 make
+# or install/uninstall to bin
+make install  # Set custom path with PREFIX=... following make install/make uninstall
 ```
