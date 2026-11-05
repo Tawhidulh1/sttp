@@ -16,7 +16,12 @@ As the name may not suggest, this is not http or anything. But a simple web serv
 + Command Line Interface
 
 
-
+## usage
+```bash
+sttp -r <path-to-site-root> -c <path-to-config>
+# both root and config are required
+# config can be left empty and you can point to any readable file (.txt, .yaml, .config) see example.conf to example
+```
 
 ## build
 ```bash
