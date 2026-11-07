@@ -1,9 +1,16 @@
 # Supertext-transfer-protocol-sttp
-As the name may not suggest, this is not http or anything. But a simple web server (or http server, idk what to call it) written in c. 
+> As the name may not suggest, this is not http or anything. But a simple web server (or http server, idk what to call it) written in c. 
 
+
+## what is sttp?
+sttp is a web and http server that allows you to host a website with a root directory and a config file. 
+
+Written in c, sttp uses the many abstracted system calls provided by the <sys/...> libraries in c to listen and wait for an http request, and responding with an http response. Currently based around http/1.1 with limited functionality. 
+
+In addition to http requests and response, the config file passed in as an argument can be used to map a path and a http method to an action (currently only supporting ```redirect```) with an additional ```args``` arugment for the action. 
 
 <p align="center">
-<img  alt="demo-image" src="https://github.com/user-attachments/assets/f7de4cb1-5e59-4505-a3ae-a9d874ca713f" />
+<img  alt="demo-image" src="assets/images/demo.png" />
 </p>
 
 
@@ -35,5 +42,10 @@ sttp -r <path-to-site-root> -c <path-to-config>
 
 
 
-## Known issue
+## known issue
 When using the binary and going to localhost:8080 some browsers may default to ```https://localhost:8080```, simply fix this by removing the s in https
+
+
+
+## License
+MIT
