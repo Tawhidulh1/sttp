@@ -30,8 +30,6 @@ cd sttp
 make
 # or install/uninstall to bin
 make install  # Set custom path with PREFIX=... following make install/make uninstall
-
-
 ```
 ## usage
 ```bash
